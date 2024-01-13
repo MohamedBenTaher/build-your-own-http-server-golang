@@ -1,38 +1,95 @@
-[![progress-banner](https://backend.codecrafters.io/progress/http-server/9bc7a787-5866-4c8d-9471-20bd7ff304ea)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
+# Web Server Documentation
 
-This is a starting point for Go solutions to the
-["Build Your Own HTTP server" Challenge](https://app.codecrafters.io/courses/http-server/overview).
+## Introduction
+This is a simple web server written in Go that serves files from a specified directory.
 
-[HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) is the
-protocol that powers the web. In this challenge, you'll build a HTTP/1.1 server
-that is capable of serving multiple clients.
+The web supports is inspired by the [Codecrafters HTTP Server Challenge](https://codecrafters.io/challenges/http-server) for learning Golang and understanding how web servers work under the hood.
 
-Along the way you'll learn about TCP servers,
-[HTTP request syntax](https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html),
-and more.
+## Usage
+To use the web server, follow these steps:
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
+1. Build the executable by running the following command:
+    ```
+    go build
+    ```
 
-# Passing the first stage
+2. Run the executable with the following command:
+    ```
+    ./webserver -directory <directory_path>
+    ```
+    Replace `<directory_path>` with the path to the directory you want to serve. If no directory is specified, the current directory will be served.
 
-The entry point for your HTTP server implementation is in `app/server.go`. Study
-and uncomment the relevant code, and push your changes to pass the first stage:
+3. The web server will start listening on port 4221. You can access it by opening a web browser and navigating to `http://localhost:4221`.
 
-```sh
-git add .
-git commit -m "pass 1st stage" # any msg
-git push origin master
-```
+## API Endpoints
 
-Time to move on to the next stage!
+### GET /user-agent
+Returns the User-Agent header of the HTTP request.
 
-# Stage 2 & beyond
+#### Request
+- Method: GET
+- Path: /user-agent
 
-Note: This section is for stages 2 and beyond.
+#### Response
+- Status Code: 200 OK
+- Content-Type: text/plain
+- Body: The User-Agent header value
 
-1. Ensure you have `go (1.19)` installed locally
-1. Run `./your_server.sh` to run your program, which is implemented in
-   `app/server.go`.
-1. Commit your changes and run `git push origin master` to submit your solution
-   to CodeCrafters. Test output will be streamed to your terminal.
+### GET /echo/{message}
+Returns the provided message as the response body.
+
+#### Request
+- Method: GET
+- Path: /echo/{message}
+- Replace `{message}` with the desired message.
+
+#### Response
+- Status Code: 200 OK
+- Content-Type: text/plain
+- Body: The provided message
+
+### GET /files/{file_name}
+Returns the contents of the specified file.
+
+#### Request
+- Method: GET
+- Path: /files/{file_name}
+- Replace `{file_name}` with the name of the file you want to retrieve.
+
+#### Response
+- Status Code: 200 OK
+- Content-Type: application/octet-stream
+- Body: The contents of the file
+
+### POST /files/{file_name}
+Creates a new file with the provided name and content.
+
+#### Request
+- Method: POST
+- Path: /files/{file_name}
+- Replace `{file_name}` with the name of the file you want to create.
+- Body: The content of the file
+
+#### Response
+- Status Code: 201 Created
+- Content-Type: application/octet-stream
+- Body: "File created successfully"
+
+## Error Handling
+The web server handles the following errors:
+
+- 404 Not Found: If the requested resource is not found.
+- 500 Internal Server Error: If there is an internal server error.
+
+## Dependencies
+The web server uses the following dependencies:
+
+- `net` package: For network operations.
+- `flag` package: For command-line flag parsing.
+- `os` package: For file operations.
+- `path/filepath` package: For working with file paths.
+- `strings` package: For string manipulation.
+- `bufio` package: For reading from network connections.
+
+## License
+This web server is released under the MIT License. See the [LICENSE](LICENSE) file for more details.
