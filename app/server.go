@@ -8,7 +8,7 @@ import (
 )
 
 var responseMap = map[string]string{
-	"/": "HTTP/1.1 200 OK\r\n\r\n",
+	"/": "HTTP/1.1 200 OK\r\n\r\nHello, world!",
 }
 
 func handler(conn net.Conn) {
@@ -17,14 +17,27 @@ func handler(conn net.Conn) {
 	if err != nil {
 		fmt.Println("Error reading:", err.Error())
 	}
-	requestData := strings.Split(string(request), " \r\n")
-	path := strings.Split(requestData[0], " ")[1]
-	if path, ok := responseMap[path]; ok {
-		response := path
-		conn.Write([]byte(response))
+	requestData := strings.Split(string(request), "\r\n")
+	requestLine := strings.Split(requestData[0], " ")
+	path := requestLine[1]
+	if response, ok := responseMap[path]; ok {
 		_, err := conn.Write([]byte(response))
 		if err != nil {
 			fmt.Println("Something went wrong while sending response")
+		}
+	} else if strings.Contains(path, "/echo/") {
+		body := strings.Split(path, "/echo/")[1]
+		length := len(body)
+		headers := []string{
+			"HTTP/1.1 200 OK",
+			fmt.Sprintf("Content-Type: text/plain; charset=utf-8"),
+			fmt.Sprintf("Content-Length: %v", length),
+		}
+		response := fmt.Sprintf("%s\r\n\r\n%s", strings.Join(headers, "\r\n"), body)
+		_, err := conn.Write([]byte(response))
+		if err != nil {
+			fmt.Println("Something went wrong while sending response Body")
+			os.Exit(1)
 		}
 	} else {
 		response := "HTTP/1.1 404 Not Found\r\n\r\n"
@@ -47,12 +60,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	conn, err := l.Accept()
-	if err != nil {
-		fmt.Println("Error accepting connection: ", err.Error())
-		os.Exit(1)
-	}
-	defer conn.Close()
+	for {
+		conn, err := l.Accept()
+		if err != nil {
+			fmt.Println("Error accepting connection: ", err.Error())
+			os.Exit(1)
+		}
 
-	handler(conn)
+		go handler(conn)
+	}
 }
